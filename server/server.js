@@ -65,7 +65,7 @@ app.get('/getId/:id', (req, res) => {
 app.post('/signup', async (req, res) => {
     const { username, password, email } = req.body;
 
-    await database.addUser(db, getId(), username, password, email);
+    database.addUser(db, getId(), username, password, email);
     res.send();
   });
 
@@ -85,6 +85,11 @@ app.post('/sendEmail/:id', (req, res) => {
     res.send();
 });
 
+app.post('/deleteUsers', (req, res) => {
+  database.deleteAllRecords(db);
+  res.send();
+})
+
 // Route to store text in the database
 app.post('/updateSum/:id', (req, res) => {
     const text = req.body; // Expecting { text: "Your text here" }
@@ -95,6 +100,7 @@ app.post('/updateSum/:id', (req, res) => {
     database.addJournal(db, req.params.id, text);
     console.log(text);
     writeJsonToFile('./provided.json', text);
+    res.send();
 
     // Define the command and arguments
     getSummary();

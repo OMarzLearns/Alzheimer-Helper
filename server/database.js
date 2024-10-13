@@ -108,6 +108,19 @@ const getAllRecords = (db, callback) => {
     });
 };
 
+// Function to delete all records from a specified table
+const deleteAllRecords = (db, callback) => {
+    const sql = `DELETE FROM restrictedData`;
+
+    db.run(sql, [], function(err) {
+        if (err) {
+            console.error(err.message);
+        } else {
+            console.log(`Deleted ${this.changes} records from the table.`);
+        }
+    });
+};
+
 // Export functions for use in other modules
 module.exports = {
     initializeDatabase,
@@ -115,5 +128,6 @@ module.exports = {
     addPhoto,
     addJournal,
     getAllRecords,
-    getUserById
+    getUserById,
+    deleteAllRecords
 };
