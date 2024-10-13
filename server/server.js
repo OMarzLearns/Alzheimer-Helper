@@ -82,6 +82,7 @@ app.post('/sendEmail/:id', (req, res) => {
     const {email, subject, score} = req.body; // Expecting { text: "Your text here" }
 
     emailServ.sendEmail(email, subject, score);
+    res.send();
 });
 
 // Route to store text in the database
