@@ -79,9 +79,9 @@ app.get('/retrieve', (req, res) => {
 
 // Route to store text in the database
 app.post('/sendEmail/:id', (req, res) => {
-    const {to, subject, score} = req.body; // Expecting { text: "Your text here" }
+    const {email, subject, score} = req.body; // Expecting { text: "Your text here" }
 
-    emailServ.sendEmail(to, subject, score);
+    emailServ.sendEmail(email, subject, score);
 });
 
 // Route to store text in the database

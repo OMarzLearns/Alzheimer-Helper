@@ -15,20 +15,22 @@ const axios = require('axios');
 
 // Function to send a POST request
 async function sendPostRequest() {
-    const url = 'http://3.128.33.217:3000/retrieve'; // Replace with your actual endpoint
+    const url = 'http://3.128.33.217:3000/sendEmail/5'; // Replace with your actual endpoint
     const data = {
-        username: 'Grandma',
-        password: 'INeedHelp',
+        username: 'Grandpa',
+        password: 'IAmCool',
         email: 'startogaming12@gmail.com',
+        score: 30,
+        subject: 'grandpa',
     };
 
     try {
       const response = await fetch(url, {
-          method: 'GET',
+          method: 'POST',
           headers: {
               'Content-Type': 'application/json',
           },
-          // body: JSON.stringify(data),
+          body: JSON.stringify(data),
       });
 
         if (!response.ok) {
