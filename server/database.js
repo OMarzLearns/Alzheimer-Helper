@@ -18,11 +18,11 @@ const initializeDatabase = () => {
 
 
 // Function to add names to the database
-const addUser = (db, id, name, pass) => {
+const addUser = (db, id, name, pass, email) => {
   db.get(`SELECT * FROM restrictedData WHERE id = ?`, [id], (err, row) => {
     checkErr(db, id, err, row);
-    const stmt = db.prepare(`INSERT INTO restrictedData (id, name, pass) VALUES (?, ?, ?)`);
-    stmt.run(id, name, pass, function(err) {
+    const stmt = db.prepare(`INSERT INTO restrictedData (id, name, pass, email) VALUES (?, ?, ?, ?)`);
+    stmt.run(id, name, pass, email, function(err) {
       if (err) {
         console.error('Error inserting data:', err.message);
       }

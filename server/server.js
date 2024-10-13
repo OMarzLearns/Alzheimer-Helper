@@ -63,10 +63,10 @@ app.get('/getId/:id', (req, res) => {
 
 // Create new user
 app.post('/signup', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, email } = req.body;
 
-    await database.addUser(db, getId(), username, password);
-    res.send("Success");
+    await database.addUser(db, getId(), username, password, email);
+    res.send();
   });
 
 
@@ -79,19 +79,9 @@ app.get('/retrieve', (req, res) => {
 
 // Route to store text in the database
 app.post('/sendEmail/:id', (req, res) => {
-    const text = req.body; // Expecting { text: "Your text here" }
+    const {to, subject, score} = req.body; // Expecting { text: "Your text here" }
 
-    if (!text) {
-        return res.status(400).send('Text is required.');
-    }
-    database.addJournal(db, req.params.id, text);
-    console.log(text);
-    writeJsonToFile('./provided.json', text);
-
-    // Define the command and arguments
-    getSummary();
-    const data = readJsonFile('./Output.json');
-    res.json(data);
+    emailServ.sendEmail(to, subject, score);
 });
 
 // Route to store text in the database
