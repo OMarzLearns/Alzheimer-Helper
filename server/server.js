@@ -104,8 +104,8 @@ app.post('/updateSum/:id', (req, res) => {
 
     // Define the command and arguments
     getSummary();
-    const data = readJsonFile('./Output.json');
-    res.json(data);
+    // const data = readJsonFile('./Output.json');
+    // res.json(data);
 });
 
 app.get('/', (req, res) => {

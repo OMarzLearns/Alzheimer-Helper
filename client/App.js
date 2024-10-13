@@ -1,19 +1,23 @@
 const axios = require('axios');
 
 function main() {
-  // try {
-  //   const response = fetch('http://localhost:3000/deleteUsers', {
-  //       method: 'POST',
-  //   });
-  // } catch (error) {
-  //     console.error('Error:', error);
-  // }
 
+  // deleter();
   // createUser();
   // getUsers();
   // getUserById();
-  writeBook();
+  // writeBook();
   sendEmail();
+}
+
+async function deleter() {
+  try {
+    const response = fetch('http://3.128.33.217:3000/deleteUsers', {
+        method: 'POST',
+    });
+  } catch (error) {
+      console.error('Error:', error);
+  }
 }
 
 async function createUser() {
