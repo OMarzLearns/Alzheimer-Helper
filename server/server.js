@@ -1,60 +1,123 @@
 // server.js
 const express = require("express");
 const cors = require("cors");
-const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require("body-parser");
 const { Pool } = require("pg");
+const fs = require('fs');
 require("dotenv").config();
+const database = require('./database');
+const emailServ = require('./emailServ');
+const { spawn } = require('child_process');
+var tag = 0;
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
+const PORT = process.env.PORT || 3000;
+const db = database.initializeDatabase();
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// Connect to the SQLite database
-const db = new sqlite3.Database(':memory:', (err) => {
-    if (err) {
-        console.error('Could not connect to database', err);
-    } else {
-        console.log('Connected to SQLite database');
-        // Create a sample table
-        db.run(`CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT)`);
+function getId() {
+  tag++;
+  return tag;
+}
+
+function readJsonFile(filePath) {
+  try {
+      const data = fs.readFileSync(filePath, 'utf8'); // Read the file synchronously
+      const jsonData = JSON.parse(data); // Parse the JSON string into an object
+      return jsonData; // Return the JSON object
+  } catch (err) {
+      console.error('Error reading the JSON file:', err);
+      return null; // Return null in case of an error
+  }
+}
+
+function writeJsonToFile(filePath, data) {
+    const jsonData = JSON.stringify(data, null, 2); // Convert JavaScript object to JSON string
+    fs.writeFile(filePath, jsonData, 'utf8', (err) => {
+        if (err) {
+            console.error('Error writing to JSON file:', err);
+        } else {
+            console.log('Data successfully written to JSON file!');
+        }
+    });
+}
+
+function getSummary() {
+  // executePython.js
+  const pythonProcess = spawn('python3', ['summAi.py']); //Use 'python3' if necessary
+
+  // // Handle standard output
+  pythonProcess.stdout.on('data', (data) => {
+      console.log(`Output from Python: ${data}`);
+  });
+}
+
+// Set name to id
+app.get('/getId/:id', (req, res) => {
+  database.getUserById(db, req.params.id, (restrictedData) => {
+    res.send(restrictedData);
+  });
+});
+
+// Create new user
+app.post('/signup', async (req, res) => {
+    const { username, password } = req.body;
+
+    await database.addUser(db, getId(), username, password);
+    res.send("Success");
+  });
+
+
+// Retrieve and display all records
+app.get('/retrieve', (req, res) => {
+  database.getAllRecords(db, (restrictedData) => {
+    res.send(restrictedData);
+  });
+});
+
+// Route to store text in the database
+app.post('/sendEmail/:id', (req, res) => {
+    const text = req.body; // Expecting { text: "Your text here" }
+
+    if (!text) {
+        return res.status(400).send('Text is required.');
     }
+    database.addJournal(db, req.params.id, text);
+    console.log(text);
+    writeJsonToFile('./provided.json', text);
+
+    // Define the command and arguments
+    getSummary();
+    const data = readJsonFile('./Output.json');
+    res.json(data);
 });
 
-// Seed some data
-db.serialize(() => {
-    const stmt = db.prepare("INSERT INTO users (name, email) VALUES (?, ?)");
-    stmt.run("John Doe", "john@example.com");
-    stmt.run("Jane Smith", "jane@example.com");
-    stmt.finalize();
+// Route to store text in the database
+app.post('/updateSum/:id', (req, res) => {
+    const text = req.body; // Expecting { text: "Your text here" }
+
+    if (!text) {
+        return res.status(400).send('Text is required.');
+    }
+    database.addJournal(db, req.params.id, text);
+    console.log(text);
+    writeJsonToFile('./provided.json', text);
+
+    // Define the command and arguments
+    getSummary();
+    const data = readJsonFile('./Output.json');
+    res.json(data);
 });
 
-// GET route to retrieve all users
-app.get('/users', (req, res) => {
-    db.all("SELECT * FROM users", [], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(rows);
-        }
-    });
+app.get('/', (req, res) => {
+    res.send('Welcome to the homepage!');
 });
 
-// GET route to retrieve a user by ID
-app.get('/users/:id', (req, res) => {
-    const id = req.params.id;
-    db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else if (row) {
-            res.json(row);
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    });
+// Catch-all route for non-existent routes
+app.use((req, res) => {
+    res.status(404).send('Forbidden.');
 });
 
 // Start the server
